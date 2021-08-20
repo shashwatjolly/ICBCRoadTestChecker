@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 
 const signIn = async (browser, page) => {
+    console.log("Opening ICBC's website...")
     await page.goto('https://onlinebusiness.icbc.com/webdeas-ui/login;type=driver');
     await page.type('input[formcontrolname="drvrLastName"]', "Patel");
     await page.type('input[formcontrolname="licenceNumber"]', "4569157");
@@ -20,11 +21,14 @@ const signIn = async (browser, page) => {
 }
 
 const rescheduleAppointment = async (page) => {
+    const appointmentDate = (await page.$eval('div.appointment-time', div => div.innerHTML)).split('<')[0];
+    const parts = appointmentDate.trim().split(',');
+    currentAppointmentDate = Date.parse(parts[0].slice(0, -2) + "," + parts[1]);
     await page.$eval('div.appointment-panel button:first-of-type', button => button.click());
     await page.$eval('div.otp-action-buttons > button.mat-raised-button', button => button.click());
     await page.waitForSelector("button.search-button", {timeout: 5000});
     console.log("Moving on to location search...");
-    await searchAppointmentsByLocation(page, "Vancouver, BC");
+    await searchAppointmentsByLocation(page, "Whistler, BC");
 }
 
 const checkAvailabliityInContainer = async (page, container) => {
@@ -35,8 +39,19 @@ const checkAvailabliityInContainer = async (page, container) => {
     console.log(title + ":");
     if(className != "no-appts-msg") {
         // TODO: logic for parsing dates and times
-        const t = await page.$$eval('.date-title, div.mat-button-toggle-label-content', div => div.map(button => button.innerHTML));
-        console.log(t);
+        const dates = await page.$$eval('.date-title', div => div.map(button => button.innerHTML));
+        const parsedDates = dates.map(date => {
+                                const parts = date.trim().split(',');
+                                const formattedDate = parts[0] + "," + parts[1].slice(0, -2) + "," + parts[2];
+                                return Date.parse(formattedDate);
+                            });
+        currentAppointmentDate = Date.parse("February 9, 2022");
+        let validAvailableDates = parsedDates.filter(parsedDate => {
+            const daysDifferenceAppointment = Math.ceil((currentAppointmentDate - parsedDate)/(1000 * 60 * 60 * 24));
+            const daysDifferenceCurrent = Math.floor((parsedDate - Date.now())/(1000 * 60 * 60 * 24));
+            return daysDifferenceAppointment > 0 && daysDifferenceCurrent >= 30;
+        });
+        console.log(validAvailableDates.map(date => (new Date(date)).toDateString()));
     }
     else {
         console.log("No slots available");
@@ -57,8 +72,10 @@ const searchAppointmentsByLocation = async (page, location) => {
     }
 }
 
+let currentAppointmentDate = "";
+
 (async () => {
-    const browser = await puppeteer.launch({slowMo: 250 });
+    const browser = await puppeteer.launch({slowMo: 150});
     const page = await browser.newPage();
     await signIn(browser, page);
     await rescheduleAppointment(page);
