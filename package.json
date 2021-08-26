@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "puppeteer": "^10.2.0",
-    "request": "^2.88.2"
+    "readline-sync": "^1.4.10",
+    "request": "^2.88.2",
+    "winston": "^3.3.3"
   }
 }
