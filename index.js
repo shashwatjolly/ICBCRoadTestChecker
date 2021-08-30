@@ -1,8 +1,12 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const request = require('request');
 const readlineSync = require('readline-sync');
 const fs = require('fs');
 const winston = require('winston');
+const yargs = require('yargs');
+const { exit } = require('process');
+
+const FEATURE_CHROME_PACKAGED = true;
 
 const signIn = async (browser, page) => {
     logger.info("Opening ICBC's website...");
@@ -70,7 +74,7 @@ const checkAvailabliityInContainer = async (page, container, validAvailableDates
                                 const formattedDate = parts[0] + "," + parts[1].slice(0, -2) + "," + parts[2];
                                 return Date.parse(formattedDate);
                             });
-        currentAppointmentDate = Date.parse("February 9, 2022");
+        // currentAppointmentDate = Date.parse("February 9, 2022");
         validAvailableDates[title] = parsedDates.filter(parsedDate => {
             const daysDifferenceAppointment = Math.ceil((currentAppointmentDate - parsedDate)/(1000 * 60 * 60 * 24));
             const daysDifferenceCurrent = Math.floor((parsedDate - Date.now())/(1000 * 60 * 60 * 24));
@@ -180,11 +184,22 @@ let params = {};
 let logger;
 let browser = null;
 
-(async () => {
+const main = async () => {
     initLogger();
     try {
         readCreds();
-        browser = await puppeteer.launch({slowMo: 150});
+        let chromePath = "./chrome-win/chrome.exe";
+        if(FEATURE_CHROME_PACKAGED) {
+            if(process.env.IRTC_STANDALONE) {
+                const args = yargs.argv;
+                chromePath = args.chromePath;
+                if(!chromePath) {
+                    console.log("Please specify your chrome installation path using --chromePath.");
+                    exit();
+                }
+            }
+        }
+        browser = await puppeteer.launch({executablePath: chromePath, slowMo: 150});
         const page = await browser.newPage();
         let validAvailableDates = {};
         let validLocations = ["Vancouver, BC", "Richmond, BC", "Surrey, BC"];
@@ -196,6 +211,7 @@ let browser = null;
         sendNotificationEmail(validAvailableDates);
     }
     catch(err) {
+        console.log(err);
         logger.error(err);
     }
     finally {
@@ -203,5 +219,12 @@ let browser = null;
             await browser.close();
         }
     }
-})();
+};
 
+// 20 min = 15*60*1000 = 900000
+const runner = async () => {
+    await main();
+    setTimeout(runner, 900000);
+};
+
+runner();
