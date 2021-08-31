@@ -186,7 +186,16 @@ const main = async () => {
     initLogger();
     try {
         if (process.env.NODE_ENV === "production") {
-            const packagedChromePath = "./chrome-win/chrome.exe"
+            let packagedChromePath;
+            if(process.platform === "win32") {
+                packagedChromePath = "./chrome-win/chrome.exe"
+            }
+            else if(process.platform === "linux") {
+                packagedChromePath = "./chrome-linux/chrome"
+            }
+            else if(process.platform === "darwin") {
+                packagedChromePath = "./chrome-mac/Chromium.app/Contents/MacOS/Chromium"
+            }
             const args = yargs.argv;
             const userChromePath = args.chromePath;
             if(userChromePath) {
