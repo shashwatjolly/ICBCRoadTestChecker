@@ -1,12 +1,10 @@
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const request = require('request');
 const readlineSync = require('readline-sync');
 const fs = require('fs');
 const winston = require('winston');
 const yargs = require('yargs');
 const { exit } = require('process');
-
-const FEATURE_CHROME_PACKAGED = true;
 
 const signIn = async (browser, page) => {
     logger.info("Opening ICBC's website...");
@@ -187,19 +185,28 @@ let browser = null;
 const main = async () => {
     initLogger();
     try {
-        readCreds();
-        let chromePath = "./chrome-win/chrome.exe";
-        if(FEATURE_CHROME_PACKAGED) {
-            if(process.env.IRTC_STANDALONE) {
-                const args = yargs.argv;
-                chromePath = args.chromePath;
-                if(!chromePath) {
+        if (process.env.NODE_ENV === "production") {
+            const packagedChromePath = "./chrome-win/chrome.exe"
+            const args = yargs.argv;
+            const userChromePath = args.chromePath;
+            if(userChromePath) {
+                browser = await puppeteer.launch({executablePath: userChromePath, slowMo: 150});
+            }
+            else {
+                if(fs.existsSync(packagedChromePath)) {
+                    browser = await puppeteer.launch({executablePath: packagedChromePath, slowMo: 150});
+                }
+                else {
                     console.log("Please specify your chrome installation path using --chromePath.");
-                    exit();
+                    console.log("Press Ctrl+C to exit (or just close the app)");
+                    return;
                 }
             }
         }
-        browser = await puppeteer.launch({executablePath: chromePath, slowMo: 150});
+        else {
+            browser = await puppeteer.launch({slowMo: 150});
+        }
+        readCreds();
         const page = await browser.newPage();
         let validAvailableDates = {};
         let validLocations = ["Vancouver, BC", "Richmond, BC", "Surrey, BC"];
