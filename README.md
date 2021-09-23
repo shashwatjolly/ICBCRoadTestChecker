@@ -36,7 +36,7 @@ When you run the tool for the first time, you'll need to provide your login deta
 
 You'll also need to specify the `number of days from today after which you want to search for road test dates`. This means the tool won't search for an appointment on just the next day or the day after that. It will look for dates beyond the limit specified - once you are ready :)
 
-**If the tool has difficulty signing in, it might be that there's some type/issue in the credentials entered. You can verify the credentials by going to `%APPDATA%\ICBCRoadTestChecker\params.json`. You can make any corrections there, save the file and run the tool again.**
+**If the tool has difficulty signing in, it might be that there's some typo/issue in the credentials entered. You can verify the credentials by going to `%APPDATA%\ICBCRoadTestChecker\params.json`. You can make any corrections there, save the file and run the tool again.**
 
 ## Receiving email notifications
 
