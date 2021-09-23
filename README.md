@@ -4,7 +4,7 @@ Do you spend a lot of time refreshing the ICBC website looking for a road test s
 
 ## How do I run it?
 
-Please have a look at the *Releases* section.
+Please have a look at the [*Releases* section](https://github.com/shashwatjolly/ICBCRoadTestChecker/releases/).
 
 Zip files include a version of Chromium needed for the script to work. It should be the default option for most users. Extract the zip file and run the binary included in it.
 
