@@ -30,4 +30,18 @@ To run the tool from source, you'll need to install [Node and NPM](https://nodej
 
 ## Running the tool
 
+Before running the tool, you need to book an appointment on the ICBC website - it doesn't need to be a specific date, any appointment will do. The tool will only search for appointments *before* this date.
+
 When you run the tool for the first time, you'll need to provide your login details - your last name, license number and your keyword. All of this data is stored locally on your PC in `%APPDATA%\ICBCRoadTestChecker` (on Windows). You can also see the tool's logs in the `data` file in this folder.
+
+You'll also need to specify the `number of days from today after which you want to search for road test dates`. This means the tool won't search for an appointment on just the next day or the day after that. It will look for dates beyond the limit specified - once you are ready :)
+
+**If the tool has difficulty signing in, it might be that there's some type/issue in the credentials entered. You can verify the credentials by going to `%APPDATA%\ICBCRoadTestChecker\params.json`. You can make any corrections there, save the file and run the tool again.**
+
+## Receiving email notifications
+
+The tool asks for your email address as part of the one-time setup. This is optional - you only need it if you want to be notified of new appointment dates through email. You can leave the field blank to opt out of the emails and just have a look at the logs if you want.
+
+**If you have specified your email, but can't see notifications in your inbox, be sure to check your spam folder and mark it as "not spam" to receive future notifications**
+
+
